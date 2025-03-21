@@ -1,4 +1,4 @@
-# MysqlCcaler
+# MysqlScaler
 
 **MysqlCcaler** is a high-performance middleware layer that enables horizontal scaling of MySQL databases. It allows you to distribute your data across multiple MySQL instances while maintaining the familiar MySQL interface.
 
