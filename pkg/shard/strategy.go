@@ -2,6 +2,7 @@ package shard
 
 import (
 	"fmt"
+	"hash/fnv"
 	"sort"
 	"sync"
 )
@@ -54,4 +55,11 @@ func (c *ConsistentHashStrategy) AddShard(shardID string) {
 		return c.ring[i] < c.ring[j]
 	})
 
+}
+
+// hashKey hashes a key to a uint32 value
+func (c *ConsistentHashStrategy) hashKey(key string) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(key))
+	return h.Sum32()
 }
