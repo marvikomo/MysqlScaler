@@ -63,3 +63,31 @@ func (c *ConsistentHashStrategy) hashKey(key string) uint32 {
 	h.Write([]byte(key))
 	return h.Sum32()
 }
+
+// GetShardID implements ShardingStrategy.GetShardID
+func (c *ConsistentHashStrategy) GetShardID(key string) (string, error) {
+	if len(c.ring) == 0 {
+		return "", fmt.Errorf("no shards available")
+	}
+
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	hash := c.hashKey(key)
+	idx := c.search(hash)
+
+	// If the hash is greater than the largest hash in the ring, wrap around
+	if idx == len(c.ring) {
+		idx = 0
+	}
+
+	return c.shardMap[c.ring[idx]], nil
+}
+
+// search finds the first index in the ring with a hash >= the given hash
+func (c *ConsistentHashStrategy) search(hash uint32) int {
+	// Binary search the ring
+	return sort.Search(len(c.ring), func(i int) bool {
+		return c.ring[i] >= hash
+	})
+}
