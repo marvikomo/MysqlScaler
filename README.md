@@ -1,6 +1,6 @@
-# ShardBridge
+# MysqlScaler
 
-**ShardBridge** is a high-performance middleware layer that enables horizontal scaling of MySQL databases. It allows you to distribute your data across multiple MySQL instances while maintaining the familiar MySQL interface.
+**MysqlCcaler** is a high-performance middleware layer that enables horizontal scaling of MySQL databases. It allows you to distribute your data across multiple MySQL instances while maintaining the familiar MySQL interface.
 
 
 
@@ -28,8 +28,7 @@
 - [Sharding Strategies](#-sharding-strategies)  
 - [API Reference](#-api-reference)  
 - [Scaling Guidelines](#-scaling-guidelines)  
-- [Monitoring](#-monitoring)  
-- [Troubleshooting](#-troubleshooting)  
+- [Monitoring](#-monitoring)   
 - [Performance Tuning](#-performance-tuning)  
 - [Contributing](#-contributing)  
 - [License](#license)
@@ -41,25 +40,30 @@
 ### Using Go
 
 ```bash
-go get github.com/yourusername/mysqlscaler
+go get github.com/marvikomo/mysqlscaler
+```
 
-From Source
-
-git clone https://github.com/yourusername/mysqlscaler.git
+### From Source
+```bash
+git clone https://github.com/marvikomo/mysqlscaler.git
 cd mysqlscaler
 go build -o mysqlscaler ./cmd/server
+```
 
-Docker
-docker pull yourusername/mysqlscaler:latest
+### Docker
+```bash
+docker pull marvikomo/mysqlscaler:latest
+```
 
-🚀 Quick Start
+## 🚀 Quick Start
 
-1. Set up MySQL instances
+### 1. Set up MySQL instances
 
 Set up multiple MySQL instances using Docker, cloud, or bare metal.
 
-2. Create a configuration file
+### 2. Create a configuration file
 
+```bash
 sharding:
   strategy: "consistent-hash"
   virtualNodes: 10
@@ -93,23 +97,27 @@ tables:
     shardKeys: ["user_id"]
   products:
     shardKeys: ["product_id"]
+```
 
-3. Initialize your database schema
-
+### 3. Initialize your database schema
+```bash
 mysql -h mysql-shard1-master -u user -p mydb < schema.sql
 mysql -h mysql-shard2-master -u user -p mydb < schema.sql
+```
 
-4. Start MySQLScaler
+### 4. Start MySQLScaler
+```bash
 ./mysqlscaler --config=config.yaml
+```
 
-5. Connect your application
-
+### 5. Connect your application
+```bash
 package main
 
 import (
     "context"
     "log"
-    "github.com/yourusername/mysqlscaler/client"
+    "github.com/marvikomo/mysqlscaler/client"
 )
 
 func main() {
@@ -129,15 +137,16 @@ func main() {
         // Process each row
     }
 }
+```
 
-Standard SQL Driver
-
+### Standard SQL Driver
+```bash
 package main
 
 import (
     "database/sql"
     "log"
-    _ "github.com/yourusername/mysqlscaler/driver"
+    _ "github.com/marvikomo/mysqlscaler/driver"
 )
 
 func main() {
@@ -157,10 +166,10 @@ func main() {
         // Process each row
     }
 }
+```
 
 
-
-🏗 Architecture
+## 🏗 Architecture
 	•	Shard Manager
 	•	Query Router
 	•	Connection Pool
@@ -168,8 +177,8 @@ func main() {
 	•	Health Monitor
 	•	Metadata Store
 
-⚙️ Configuration
-
+## ⚙️ Configuration
+```bash
 server:
   host: "0.0.0.0"
   port: 3000
@@ -195,9 +204,10 @@ logging:
   level: "info"
   format: "json"
   output: "stdout"
+```
 
-🧩 Sharding Strategies
-
+## 🧩 Sharding Strategies
+```bash
 sharding:
   strategy: "consistent-hash"
   virtualNodes: 10
@@ -215,10 +225,11 @@ sharding:
     - min: "1000001"
       max: ""
       shard: "shard3"
+```
+## 📚 API Reference
 
-📚 API Reference
-
-Client API
+### Client API
+```bash
 result, err := client.Query(ctx, "SELECT * FROM users WHERE user_id = ?", 12345)
 
 affectedRows, err := client.Execute(ctx, "UPDATE users SET name = ? WHERE user_id = ?", "John", 12345)
@@ -231,9 +242,9 @@ err := client.Transaction(ctx, func(tx *client.Tx) error {
     _, err = tx.Execute("UPDATE inventory SET stock = stock - 1 WHERE product_id = ?", 67890)
     return err
 })
-
-Management API
-
+```
+### Management API
+```bash
 err := admin.AddShard(ctx, &shard.ShardInfo{
     ID: "shard3",
     MasterDSN: "user:password@tcp(mysql-shard3-master:3306)/mydb",
@@ -246,54 +257,59 @@ err := admin.RemoveShard(ctx, "shard3")
 
 err := admin.RebalanceData(ctx, nil)
 
+```
+## 📈 Scaling Guidelines
 
-📈 Scaling Guidelines
 
-
-Choosing Shard Keys
+### Choosing Shard Keys
 	•	High cardinality
 	•	Even distribution
 	•	Frequently used in queries
 	•	Rarely updated
 
-When to Add Shards
+### When to Add Shards
 	•	Shard size > 75% of optimal capacity
 	•	Increased latency
 	•	High CPU or I/O load
 
-Data Rebalancing
-
+### Data Rebalancing
+```bash
 ./mysqlscaler shard rebalance --throttle=50MB/s --time-window="22:00-06:00"
 
+```
+## 📊 Monitoring
 
-📊 Monitoring
-
-Exposed Prometheus metrics at /metrics:
+###  Prometheus metrics at /metrics:
 	•	mysqlscaler_query_latency
 	•	mysqlscaler_queries_per_second
 	•	mysqlscaler_shard_connections
 	•	mysqlscaler_shard_errors
 	•	mysqlscaler_cross_shard_queries
 
-Sample Grafana dashboards available in the monitoring/ directory.
+### Sample Grafana dashboards available in the monitoring/ directory.
 
-⚡ Performance Tuning
+## ⚡ Performance Tuning
+```bash
 connection:
   maxOpenConns: 50
   maxIdleConns: 10
   connTimeout: "5s"
   idleTimeout: "60s"
-
+```
 	•	Include shard keys in queries
 	•	Use batch operations
 	•	Denormalize related data if needed
 	•	Rebalance shards proactively
 
-🤝 Contributing
+## 🤝 Contributing
 
 We welcome your contributions! See CONTRIBUTING.md for instructions.
-git clone https://github.com/yourusername/mysqlscaler.git
+git clone https://github.com/marvikomo/mysqlscaler.git
 cd mysqlscaler
 go mod download
 go test ./...
 golangci-lint run
+
+## 🪪 License
+
+Licensed under the MIT License.
